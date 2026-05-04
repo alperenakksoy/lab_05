@@ -1,4 +1,4 @@
-openapi: 3.1
+openapi: 3.1.0
 
 info:
   title: Vehicle Tracking API
@@ -13,65 +13,93 @@ servers:
     description: Local development — API Version 1
   - url: http://localhost/api/v2
     description: Local development — API Version 2
-
 paths:
+
+  /health:
+    get:
+      summary: Check API status
+      responses:
+        "200":
+          description: OK
+
+  /api/versions:
+    get:
+      summary: List API versions
+      responses:
+        "200":
+          description: Versions list
 
   /vehicles:
     get:
-      summary: List all vehicles
-      description: Retrieve a list of all vehicles in the fleet
+      summary: Get vehicles (v1)
       responses:
-        '200':
-          description: A list of vehicles
-          content:
-            application/json:
-              schema:
-                type: array
+        "200":
+          description: List of vehicles
 
     post:
-      tags:
-        - Vehicles
-      summary: Create a new vehicle
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref:
+      summary: Create vehicle (v1)
       responses:
-        '201':
-          description: Vehicle created successfully
-          content:
-            application/json:
-              schema:
-                $ref:
-        '400':
-          description: Invalid input
-          content:
-            application/json:
-              schema:
-                $ref:
-        '409':
-          description: Vehicle with license plate or VIN already exists
+        "201":
+          description: Created
 
-  /vehicles/{vehicle_id}:
+  /vehicles/{id}:
     get:
-      tags:
-        - Vehicles
-      summary: Get vehicle by ID
-      parameters:
-        - name: vehicle_id
-          in: path
-          required: true
-          schema:
-            type: integer
-          description: Vehicle ID
+      summary: Get vehicle by ID (v1)
       responses:
-        '200':
-          description: Vehicle found
-          content:
-            application/json:
-              $ref:
-        '404':
-          description: Vehicle not found
+        "200":
+          description: Found
 
+    put:
+      summary: Update vehicle (v1)
+
+    delete:
+      summary: Delete vehicle (v1)
+
+  /v2/vehicles:
+    get:
+      summary: Get vehicles (v2)
+      description: Uses "registration" instead of "plate"
+
+    post:
+      summary: Create vehicle (v2)
+
+  /v2/vehicles/{id}:
+    get:
+      summary: Get vehicle (v2)
+
+    put:
+      summary: Update vehicle (v2)
+
+    delete:
+      summary: Delete vehicle (v2)
+
+components:
+
+  schemas:
+
+    VehicleV1:
+      type: object
+      properties:
+        id:
+          type: integer
+        plate:
+          type: string
+        model:
+          type: string
+
+    VehicleV2:
+      type: object
+      properties:
+        id:
+          type: integer
+        registration:
+          type: string
+        model:
+          type: string
+        coordinates:
+          type: object
+          properties:
+            latitude:
+              type: number
+            longitude:
+              type: number

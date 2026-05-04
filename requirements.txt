@@ -1,2 +1,5 @@
 sqlalchemy
 openapi
+fastapi
+
+pydantic

@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy import ForeignKey, Float, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from entitiy.Vehicle import Vehicle
+from app.entitiy.Vehicle import Vehicle
 
 class FuelLog():
     __tablename__ = "fuel_logs"
@@ -15,5 +15,3 @@ class FuelLog():
     logged_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     vehicle: Mapped["Vehicle"] = relationship("Vehicle", back_populates="fuel_logs")
-
-    

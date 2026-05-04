@@ -1,7 +1,7 @@
 from datetime import datetime
 from sqlalchemy import ForeignKey, Float, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from entitiy.Vehicle import Vehicle
+from app.entitiy.Vehicle import Vehicle
 
 
 class Position():

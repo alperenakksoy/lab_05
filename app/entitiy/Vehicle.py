@@ -1,11 +1,10 @@
 from datetime import datetime
 from sqlalchemy import DateTime,String,Enum as SAEnum
-from sqlalchemy import Column
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from enums.vehicle_enum import VehicleStatus
-from entitiy.Position import Position
-from entitiy.FuelLog import FuelLog
+from app.enums.vehicle_enum import VehicleStatus
+from app.entitiy.Position import Position
+from app.entitiy.FuelLog import FuelLog
 
 class Vehicle(object):
     __tablename__ = 'vehicles'
