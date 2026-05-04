@@ -1,0 +1,77 @@
+openapi: 3.1
+
+info:
+  title: Vehicle Tracking API
+  description: Comprehensive API for managing fleet vehicles
+  version: 1.0
+  contact:
+    name: Ahmet Alperen Aksoy
+    email: Ahmet-Alperen.Aksoy@hsrw.org
+
+servers:
+  - url: http://localhost/api/v1
+    description: Local development — API Version 1
+  - url: http://localhost/api/v2
+    description: Local development — API Version 2
+
+paths:
+
+  /vehicles:
+    get:
+      summary: List all vehicles
+      description: Retrieve a list of all vehicles in the fleet
+      responses:
+        '200':
+          description: A list of vehicles
+          content:
+            application/json:
+              schema:
+                type: array
+
+    post:
+      tags:
+        - Vehicles
+      summary: Create a new vehicle
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref:
+      responses:
+        '201':
+          description: Vehicle created successfully
+          content:
+            application/json:
+              schema:
+                $ref:
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref:
+        '409':
+          description: Vehicle with license plate or VIN already exists
+
+  /vehicles/{vehicle_id}:
+    get:
+      tags:
+        - Vehicles
+      summary: Get vehicle by ID
+      parameters:
+        - name: vehicle_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Vehicle ID
+      responses:
+        '200':
+          description: Vehicle found
+          content:
+            application/json:
+              $ref:
+        '404':
+          description: Vehicle not found
+
