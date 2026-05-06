@@ -1,5 +1,4 @@
 sqlalchemy
 openapi
 fastapi
-
 pydantic
