@@ -2,22 +2,25 @@ openapi: 3.1.0
 
 info:
   title: Vehicle Tracking API
-  description: Comprehensive API for managing fleet vehicles
-  version: 1.0
+  description: Comprehensive API for managing fleet vehicles, sensor readings, and logs.
+  version: 1.0.0
   contact:
     name: Ahmet Alperen Aksoy
     email: Ahmet-Alperen.Aksoy@hsrw.org
 
 servers:
-  - url: http://localhost/api/v1
-    description: Local development — API Version 1
-  - url: http://localhost/api/v2
-    description: Local development — API Version 2
-paths:
+  - url: http://localhost:8000
+    description: Local Development Server
 
+# TASK 1 FIX: Added Security Scheme (API Key)
+security:
+  - ApiKeyAuth: []
+
+paths:
   /health:
     get:
       summary: Check API status
+      security: [] # Unsecured endpoint
       responses:
         "200":
           description: OK
@@ -25,57 +28,219 @@ paths:
   /api/versions:
     get:
       summary: List API versions
+      security: []
       responses:
         "200":
           description: Versions list
+        "429":
+          $ref: '#/components/responses/TooManyRequests'
 
-  /vehicles:
+  # --- V1 VEHICLES ---
+  /api/v1/vehicles:
     get:
-      summary: Get vehicles (v1)
+      summary: List vehicles (v1)
       responses:
         "200":
           description: List of vehicles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VehicleV1'
+        "429":
+          $ref: '#/components/responses/TooManyRequests'
 
     post:
       summary: Create vehicle (v1)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VehicleCreate'
       responses:
         "201":
-          description: Created
+          description: Vehicle Created
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "409":
+          description: Conflict (Plate already exists)
 
-  /vehicles/{id}:
+  /api/v1/vehicles/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
     get:
       summary: Get vehicle by ID (v1)
       responses:
         "200":
-          description: Found
+          description: Found Vehicle
+        "404":
+          $ref: '#/components/responses/NotFound'
 
     put:
       summary: Update vehicle (v1)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VehicleUpdate'
+      responses:
+        "200":
+          description: Vehicle Updated
+        "404":
+          $ref: '#/components/responses/NotFound'
 
     delete:
       summary: Delete vehicle (v1)
+      responses:
+        "204":
+          description: No Content (Successfully Deleted)
+        "404":
+          $ref: '#/components/responses/NotFound'
 
-  /v2/vehicles:
-    get:
-      summary: Get vehicles (v2)
-      description: Uses "registration" instead of "plate"
-
+  # --- V1 POSITIONS & FUEL ---
+  /api/v1/vehicles/{id}/positions:
     post:
-      summary: Create vehicle (v2)
+      summary: Log a vehicle position
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PositionCreate'
+      responses:
+        "201":
+          description: Position Logged
+        "404":
+          $ref: '#/components/responses/NotFound'
 
-  /v2/vehicles/{id}:
+  /api/v1/vehicles/{id}/fuel:
+    post:
+      summary: Log vehicle fuel level
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FuelLogCreate'
+      responses:
+        "201":
+          description: Fuel Logged
+        "404":
+          $ref: '#/components/responses/NotFound'
+
+  # --- V2 VEHICLES ---
+  /api/v2/vehicles:
     get:
-      summary: Get vehicle (v2)
-
-    put:
-      summary: Update vehicle (v2)
-
-    delete:
-      summary: Delete vehicle (v2)
+      summary: List vehicles (v2)
+      description: Uses "registration" instead of "plate"
+      responses:
+        "200":
+          description: List of vehicles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VehicleV2'
 
 components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-KEY
+
+  # TASK 1 FIX: Reusable Error Responses
+  responses:
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorDetail'
+    NotFound:
+      description: Resource Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorDetail'
+    TooManyRequests:
+      description: Rate Limit Exceeded
+      headers:
+        X-RateLimit-Limit:
+          schema:
+            type: integer
+        X-RateLimit-Remaining:
+          schema:
+            type: integer
+        X-RateLimit-Reset:
+          schema:
+            type: integer
+    ServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorDetail'
 
   schemas:
+    ErrorDetail:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    VehicleCreate:
+      type: object
+      required:
+        - plate
+        - model
+      properties:
+        plate:
+          type: string
+        model:
+          type: string
+        driver:
+          type: string
+        status:
+          type: string
+          enum: [active, inactive, maintenance]
+
+    VehicleUpdate:
+      type: object
+      properties:
+        plate:
+          type: string
+        model:
+          type: string
+        driver:
+          type: string
+        status:
+          type: string
 
     VehicleV1:
       type: object
@@ -86,6 +251,10 @@ components:
           type: string
         model:
           type: string
+        status:
+          type: string
+        _links:
+          type: object
 
     VehicleV2:
       type: object
@@ -96,10 +265,30 @@ components:
           type: string
         model:
           type: string
-        coordinates:
+        status:
+          type: string
+        _links:
           type: object
-          properties:
-            latitude:
-              type: number
-            longitude:
-              type: number
+
+    PositionCreate:
+      type: object
+      required:
+        - latitude
+        - longitude
+      properties:
+        latitude:
+          type: number
+        longitude:
+          type: number
+        speed_kmh:
+          type: number
+
+    FuelLogCreate:
+      type: object
+      required:
+        - fuel_level
+      properties:
+        fuel_level:
+          type: number
+        fuel_litres:
+          type: number
