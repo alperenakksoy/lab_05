@@ -1,12 +1,15 @@
 from datetime import datetime
+from typing import TYPE_CHECKING
+
 from sqlalchemy import String, DateTime, Enum as SAEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
 from app.enums.vehicle_enum import VehicleStatus
-from app.entity.FuelLog import FuelLog
-from app.entity.Position import Position
 
+if TYPE_CHECKING:
+    from app.entity.Position import Position
+    from app.entity.FuelLog import FuelLog
 
 class Vehicle(Base):
     __tablename__ = "vehicles"
@@ -21,5 +24,10 @@ class Vehicle(Base):
                     default=VehicleStatus.ACTIVE, nullable=False)
     created_at: Mapped[datetime]      = mapped_column(DateTime, default=datetime.utcnow)
 
-    positions: Mapped[list["Position"]] = relationship("Position", back_populates="vehicle", cascade="all, delete-orphan")
-    fuel_logs: Mapped[list["FuelLog"]]  = relationship("FuelLog",  back_populates="vehicle", cascade="all, delete-orphan")
+    # String references only — never import Position/FuelLog directly here
+    positions: Mapped[list["Position"]] = relationship(
+        "Position", back_populates="vehicle", cascade="all, delete-orphan"
+    )
+    fuel_logs: Mapped[list["FuelLog"]] = relationship(
+        "FuelLog", back_populates="vehicle", cascade="all, delete-orphan"
+    )

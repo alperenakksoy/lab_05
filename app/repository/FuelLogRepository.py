@@ -11,7 +11,7 @@ def create(db: Session, vehicle_id: int, data: FuelLogCreate) -> FuelLog:
     return log
 
 
-def get_all(db: Session, vehicle_id: int) -> list[FuelLog]:
+def get_all(db: Session, vehicle_id: int) -> list[type[FuelLog]]:
     return (
         db.query(FuelLog)
         .filter(FuelLog.vehicle_id == vehicle_id)

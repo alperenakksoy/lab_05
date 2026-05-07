@@ -11,7 +11,7 @@ def create(db: Session, vehicle_id: int, data: PositionCreate) -> Position:
     return pos
 
 
-def get_latest(db: Session, vehicle_id: int) -> Position | None:
+def get_latest(db: Session, vehicle_id: int) -> type[Position] | None:
     return (
         db.query(Position)
         .filter(Position.vehicle_id == vehicle_id)

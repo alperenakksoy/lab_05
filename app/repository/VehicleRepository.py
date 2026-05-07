@@ -3,15 +3,15 @@ from app.entity.Vehicle import Vehicle
 from app.dto.VehicleDto import VehicleCreate, VehicleUpdate
 
 
-def get_all(db: Session, skip: int = 0, limit: int = 100) -> list[Vehicle]:
+def get_all(db: Session, skip: int = 0, limit: int = 100) -> list[type[Vehicle]]:
     return db.query(Vehicle).offset(skip).limit(limit).all()
 
 
-def get_by_id(db: Session, vehicle_id: int) -> Vehicle | None:
+def get_by_id(db: Session, vehicle_id: int) -> type[Vehicle] | None:
     return db.query(Vehicle).filter(Vehicle.id == vehicle_id).first()
 
 
-def get_by_plate(db: Session, plate: str) -> Vehicle | None:
+def get_by_plate(db: Session, plate: str) -> type[Vehicle] | None:
     return db.query(Vehicle).filter(Vehicle.plate == plate).first()
 
 

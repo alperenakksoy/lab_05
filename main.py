@@ -13,13 +13,13 @@ from app.dto.VehicleDto import VehicleCreate, VehicleUpdate, VehicleOut, Vehicle
 from app.dto.PositionDto import PositionCreate, PositionOut
 from app.dto.FuelLogDto import FuelLogCreate, FuelLogOut
 
-
 limiter = Limiter(key_func=get_remote_address)
 app = FastAPI(title="Vehicle Tracking API")
 app.state.limiter = limiter
+
 @app.exception_handler(RateLimitExceeded)
 async def custom_rate_limit_handler(request: Request, exc: Exception):
-    return _rate_limit_exceeded_handler(request, exc) # type: ignore
+    return _rate_limit_exceeded_handler(request, exc)
 
 @app.exception_handler(HTTPException)
 async def custom_http_exception_handler(request: Request, exc: HTTPException):
@@ -32,7 +32,7 @@ async def custom_http_exception_handler(request: Request, exc: HTTPException):
 
 DbSession = Annotated[Session, Depends(get_db)]
 
-def verify_content_type(accept: Annotated[str, Header(default="*/*")]):
+def verify_content_type(accept: str = Header(default="*/*")):
     if "application/json" not in accept and "*/*" not in accept:
         raise HTTPException(status_code=406, detail="Accept header must allow application/json")
 
@@ -83,10 +83,20 @@ def delete_vehicle_v1(request: Request, id: int, db: DbSession):
 def log_position(request: Request, id: int, data: PositionCreate, db: DbSession):
     return PositionService.log_position(db, id, data)
 
+@app.get("/api/v1/vehicles/{id}/positions/latest", response_model=PositionOut)
+@limiter.limit("100/minute")
+def get_latest_position(request: Request, id: int, db: DbSession):
+    return PositionService.get_latest(db, id)
+
 @app.post("/api/v1/vehicles/{id}/fuel", response_model=FuelLogOut, status_code=status.HTTP_201_CREATED)
 @limiter.limit("100/minute")
 def log_fuel(request: Request, id: int, data: FuelLogCreate, db: DbSession):
     return FuelLogService.log_fuel(db, id, data)
+
+@app.get("/api/v1/vehicles/{id}/fuel", response_model=list[FuelLogOut])
+@limiter.limit("100/minute")
+def get_fuel_history(request: Request, id: int, db: DbSession):
+    return FuelLogService.get_history(db, id)
 
 @app.get("/api/v2/vehicles", response_model=list[VehicleOutV2])
 @limiter.limit("100/minute")
@@ -97,3 +107,21 @@ def list_vehicles_v2(request: Request, db: DbSession, header: RequireJson, skip:
 @limiter.limit("100/minute")
 def get_vehicle_v2(request: Request, id: int, db: DbSession, header: RequireJson):
     return VehicleService.get_by_id_v2(db, id)
+
+@app.post("/api/v2/vehicles", response_model=VehicleOutV2, status_code=status.HTTP_201_CREATED)
+@limiter.limit("100/minute")
+def create_vehicle_v2(request: Request, data: VehicleCreate, db: DbSession):
+    v = VehicleService.create(db, data)
+    return VehicleService.get_by_id_v2(db, v.id)
+
+@app.put("/api/v2/vehicles/{id}", response_model=VehicleOutV2)
+@limiter.limit("100/minute")
+def update_vehicle_v2(request: Request, id: int, data: VehicleUpdate, db: DbSession):
+    VehicleService.update(db, id, data)
+    return VehicleService.get_by_id_v2(db, id)
+
+@app.delete("/api/v2/vehicles/{id}", status_code=status.HTTP_204_NO_CONTENT)
+@limiter.limit("100/minute")
+def delete_vehicle_v2(request: Request, id: int, db: DbSession):
+    VehicleService.delete(db, id)
+    return None

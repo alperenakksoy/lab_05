@@ -1,10 +1,13 @@
 from datetime import datetime
+from typing import TYPE_CHECKING
+
 from sqlalchemy import Float, DateTime, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
-from app.entity.Vehicle import Vehicle
 
+if TYPE_CHECKING:
+    from app.entity.Vehicle import Vehicle
 
 class FuelLog(Base):
     __tablename__ = "fuel_logs"
