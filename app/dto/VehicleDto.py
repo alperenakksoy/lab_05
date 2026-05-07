@@ -18,7 +18,6 @@ class VehicleUpdate(BaseModel):
 
 
 class VehicleOut(BaseModel):
-    """v1 response — field is called 'plate'."""
     model_config = ConfigDict(from_attributes=True)
 
     id:         int
@@ -31,11 +30,11 @@ class VehicleOut(BaseModel):
 
 
 class VehicleOutV2(BaseModel):
-    """v2 response — BREAKING CHANGE: 'plate' renamed to 'registration'."""
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
     id:           int
-    registration: str          # renamed from plate
+    # The alias tells Pydantic to read 'plate' from the ORM and map it here!
+    registration: str = Field(validation_alias='plate')
     model:        str
     driver:       str | None
     status:       VehicleStatus

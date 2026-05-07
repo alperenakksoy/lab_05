@@ -1,17 +1,18 @@
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict, Field
+from sqlalchemy import Float, DateTime, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app.database import Base
+from app.entity.Vehicle import Vehicle
 
 
-class FuelLogCreate(BaseModel):
-    fuel_level:  float        = Field(..., ge=0, le=100)
-    fuel_litres: float | None = None
+class FuelLog(Base):
+    __tablename__ = "fuel_logs"
 
+    id:          Mapped[int]        = mapped_column(primary_key=True, index=True)
+    vehicle_id:  Mapped[int]        = mapped_column(ForeignKey("vehicles.id", ondelete="CASCADE"), nullable=False)
+    fuel_level:  Mapped[float]      = mapped_column(Float, nullable=False)
+    fuel_litres: Mapped[float|None] = mapped_column(Float, nullable=True)
+    logged_at:   Mapped[datetime]   = mapped_column(DateTime, default=datetime.utcnow)
 
-class FuelLogOut(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    id:          int
-    vehicle_id:  int
-    fuel_level:  float
-    fuel_litres: float | None
-    logged_at:   datetime
+    vehicle: Mapped["Vehicle"] = relationship("Vehicle", back_populates="fuel_logs")

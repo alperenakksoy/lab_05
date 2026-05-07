@@ -1,4 +1,6 @@
-sqlalchemy
-openapi
 fastapi
 pydantic
+sqlalchemy
+uvicorn
+psycopg2-binary
+slowapi

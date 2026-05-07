@@ -1,19 +1,19 @@
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict, Field
+from sqlalchemy import Float, DateTime, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app.database import Base
+from app.entity.Vehicle import Vehicle
 
 
-class PositionCreate(BaseModel):
-    latitude:  float = Field(..., ge=-90,  le=90)
-    longitude: float = Field(..., ge=-180, le=180)
-    speed_kmh: float = Field(0.0, ge=0)
+class Position(Base):
+    __tablename__ = "positions"
 
+    id:          Mapped[int]      = mapped_column(primary_key=True, index=True)
+    vehicle_id:  Mapped[int]      = mapped_column(ForeignKey("vehicles.id", ondelete="CASCADE"), nullable=False)
+    latitude:    Mapped[float]    = mapped_column(Float, nullable=False)
+    longitude:   Mapped[float]    = mapped_column(Float, nullable=False)
+    speed_kmh:   Mapped[float]    = mapped_column(Float, default=0.0)
+    recorded_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
-class PositionOut(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    id:          int
-    vehicle_id:  int
-    latitude:    float
-    longitude:   float
-    speed_kmh:   float
-    recorded_at: datetime
+    vehicle: Mapped["Vehicle"] = relationship("Vehicle", back_populates="positions")

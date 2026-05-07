@@ -27,7 +27,7 @@ def _not_found(vehicle_id: int):
     )
 
 
-# v1
+# ── v1 ────────────────────────────────────────────────────────────────────────
 
 def get_all(db: Session, skip: int, limit: int) -> list[VehicleOut]:
     vehicles = VehicleRepository.get_all(db, skip, limit)
@@ -79,15 +79,12 @@ def delete(db: Session, vehicle_id: int) -> None:
     VehicleRepository.delete(db, vehicle_id)
 
 
-# v2
+
 def get_all_v2(db: Session, skip: int, limit: int) -> list[VehicleOutV2]:
     vehicles = VehicleRepository.get_all(db, skip, limit)
     result = []
     for v in vehicles:
-        out = VehicleOutV2(
-            id=v.id, registration=v.plate, model=v.model,
-            driver=v.driver, status=v.status, created_at=v.created_at,
-        )
+        out = VehicleOutV2.model_validate(v)
         object.__setattr__(out, "_links", _build_links(v.id, "v2"))
         result.append(out)
     return result
@@ -97,9 +94,7 @@ def get_by_id_v2(db: Session, vehicle_id: int) -> VehicleOutV2:
     v = VehicleRepository.get_by_id(db, vehicle_id)
     if not v:
         _not_found(vehicle_id)
-    out = VehicleOutV2(
-        id=v.id, registration=v.plate, model=v.model,
-        driver=v.driver, status=v.status, created_at=v.created_at,
-    )
+
+    out = VehicleOutV2.model_validate(v)
     object.__setattr__(out, "_links", _build_links(v.id, "v2"))
     return out
