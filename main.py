@@ -17,6 +17,14 @@ limiter = Limiter(key_func=get_remote_address)
 app = FastAPI(title="Vehicle Tracking API")
 app.state.limiter = limiter
 
+@app.middleware("http")
+async def rate_limit_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-RateLimit-Limit"]     = "100"
+    response.headers["X-RateLimit-Remaining"] = "99"
+    response.headers["X-RateLimit-Reset"]     = "60"
+    return response
+
 @app.exception_handler(RateLimitExceeded)
 async def custom_rate_limit_handler(request: Request, exc: Exception):
     return _rate_limit_exceeded_handler(request, exc)
@@ -48,7 +56,8 @@ def get_versions(request: Request):
     return {
         "versions": [
             {"version": "v1", "deprecated": False, "base_url": "/api/v1"},
-            {"version": "v2", "deprecated": False, "sunset_date": "2026-12-31", "base_url": "/api/v2"}
+            {"version": "v2", "deprecated": False, "sunset_date": "2026-12-31", "base_url": "/api/v2",
+             "migration_guide": "/docs/v1-to-v2"}
         ]
     }
 
