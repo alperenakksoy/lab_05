@@ -1,55 +1,105 @@
+from datetime import datetime, timezone
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
-from app import repository, dto, entitiy
+from app.repository import VehicleRepository
+from app.dto.VehicleDto import VehicleCreate, VehicleUpdate, VehicleOut, VehicleOutV2
 
 
-def build_vehicle_links(vehicle_id: int, version: str = "v1") -> dict:
+def _build_links(vehicle_id: int, version: str = "v1") -> dict:
     base = f"/api/{version}/vehicles"
     return {
-        "self": {"href": f"{base}/{vehicle_id}"},
+        "self":       {"href": f"{base}/{vehicle_id}"},
         "collection": {"href": base},
-        "positions": {"href": f"{base}/{vehicle_id}/positions"},
-        "fuel": {"href": f"{base}/{vehicle_id}/fuel"},
+        "positions":  {"href": f"/api/v1/vehicles/{vehicle_id}/positions"},
+        "fuel":       {"href": f"/api/v1/vehicles/{vehicle_id}/fuel"},
     }
 
-def list_vehicles(db: Session, skip: int, limit: int) -> list[models.Vehicle]:
-    """Return all vehicles — no extra logic needed here yet."""
-    return crud.get_vehicles(db, skip=skip, limit=limit)
+
+def _not_found(vehicle_id: int):
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail={
+            "error":     "NOT_FOUND",
+            "message":   f"Vehicle {vehicle_id} not found",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+    )
 
 
-def get_vehicle_or_404(db: Session, vehicle_id: int) -> models.Vehicle:
-    vehicle = crud.get_vehicle(db, vehicle_id)
-    if not vehicle:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail={"error": "NOT_FOUND", "message": f"Vehicle {vehicle_id} not found"}
-        )
-    return vehicle
+# v1
+
+def get_all(db: Session, skip: int, limit: int) -> list[VehicleOut]:
+    vehicles = VehicleRepository.get_all(db, skip, limit)
+    result = []
+    for v in vehicles:
+        out = VehicleOut.model_validate(v)
+        object.__setattr__(out, "_links", _build_links(v.id))
+        result.append(out)
+    return result
 
 
-def create_vehicle(db: Session, data: schemas.VehicleCreate) -> models.Vehicle:
-    existing = crud.get_vehicle_by_plate(db, data.plate)
-    if existing:
+def get_by_id(db: Session, vehicle_id: int) -> VehicleOut:
+    v = VehicleRepository.get_by_id(db, vehicle_id)
+    if not v:
+        _not_found(vehicle_id)
+    out = VehicleOut.model_validate(v)
+    object.__setattr__(out, "_links", _build_links(v.id))
+    return out
+
+
+def create(db: Session, data: VehicleCreate) -> VehicleOut:
+    if VehicleRepository.get_by_plate(db, data.plate):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail={
-                "error": "CONFLICT",
-                "message": f"Vehicle with plate '{data.plate}' already exists"
+                "error":     "CONFLICT",
+                "message":   f"Plate '{data.plate}' already exists",
+                "timestamp": datetime.now(timezone.utc).isoformat(),
             }
         )
-    return crud.create_vehicle(db, data)
+    v = VehicleRepository.create(db, data)
+    out = VehicleOut.model_validate(v)
+    object.__setattr__(out, "_links", _build_links(v.id))
+    return out
 
 
-def update_vehicle(
-        db: Session,
-        vehicle_id: int,
-        updates: schemas.VehicleUpdate
-) -> models.Vehicle:
-    get_vehicle_or_404(db, vehicle_id)  # raises 404 if missing
-    return crud.update_vehicle(db, vehicle_id, updates)
+def update(db: Session, vehicle_id: int, data: VehicleUpdate) -> VehicleOut:
+    if not VehicleRepository.get_by_id(db, vehicle_id):
+        _not_found(vehicle_id)
+    v = VehicleRepository.update(db, vehicle_id, data)
+    out = VehicleOut.model_validate(v)
+    object.__setattr__(out, "_links", _build_links(v.id))
+    return out
 
 
-def delete_vehicle(db: Session, vehicle_id: int) -> None:
-    get_vehicle_or_404(db, vehicle_id)
-    crud.delete_vehicle(db, vehicle_id)
+def delete(db: Session, vehicle_id: int) -> None:
+    if not VehicleRepository.get_by_id(db, vehicle_id):
+        _not_found(vehicle_id)
+    VehicleRepository.delete(db, vehicle_id)
+
+
+# v2
+def get_all_v2(db: Session, skip: int, limit: int) -> list[VehicleOutV2]:
+    vehicles = VehicleRepository.get_all(db, skip, limit)
+    result = []
+    for v in vehicles:
+        out = VehicleOutV2(
+            id=v.id, registration=v.plate, model=v.model,
+            driver=v.driver, status=v.status, created_at=v.created_at,
+        )
+        object.__setattr__(out, "_links", _build_links(v.id, "v2"))
+        result.append(out)
+    return result
+
+
+def get_by_id_v2(db: Session, vehicle_id: int) -> VehicleOutV2:
+    v = VehicleRepository.get_by_id(db, vehicle_id)
+    if not v:
+        _not_found(vehicle_id)
+    out = VehicleOutV2(
+        id=v.id, registration=v.plate, model=v.model,
+        driver=v.driver, status=v.status, created_at=v.created_at,
+    )
+    object.__setattr__(out, "_links", _build_links(v.id, "v2"))
+    return out

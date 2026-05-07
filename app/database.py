@@ -2,17 +2,15 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://fleet_user:fleet_pass@localhost:5432/fleet_db"
-)
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@db:5432/fleet_db")
 
 engine = create_engine(DATABASE_URL, pool_pre_ping=True)
-
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
 
 class Base(DeclarativeBase):
     pass
+
 
 def get_db():
     db = SessionLocal()

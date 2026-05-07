@@ -1,5 +1,5 @@
 from datetime import datetime
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class PositionCreate(BaseModel):
@@ -9,12 +9,10 @@ class PositionCreate(BaseModel):
 
 
 class PositionOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: int
     vehicle_id: int
     latitude: float
     longitude: float
     speed_kmh: float
     recorded_at: datetime
-
-    class Config:
-        from_attributes = True
