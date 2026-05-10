@@ -23,7 +23,7 @@ def create(db: Session, data: VehicleCreate) -> Vehicle:
     return vehicle
 
 
-def update(db: Session, vehicle_id: int, data: VehicleUpdate) -> Vehicle | None:
+def update(db: Session, vehicle_id: int, data: VehicleUpdate) -> type[Vehicle] | None:
     vehicle = get_by_id(db, vehicle_id)
     if not vehicle:
         return None

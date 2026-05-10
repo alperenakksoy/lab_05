@@ -9,17 +9,11 @@ from slowapi.middleware import SlowAPIMiddleware
 from app.dependencies import limiter
 from app.controller import VehicleV1Controller, VehicleV2Controller, PositionController, FuelLogController
 
-# ==========================================
-# APP SETUP
-# ==========================================
 app = FastAPI(title="Vehicle Tracking API")
 app.state.limiter = limiter
 app.add_middleware(SlowAPIMiddleware)
 
 
-# ==========================================
-# EXCEPTION HANDLERS
-# ==========================================
 @app.exception_handler(RateLimitExceeded)
 async def rate_limit_handler(request: Request, exc: Exception):
     return _rate_limit_exceeded_handler(request, exc)
@@ -34,10 +28,6 @@ async def http_exception_handler(request: Request, exc: HTTPException):
     }
     return JSONResponse(status_code=exc.status_code, content=error_content)
 
-
-# ==========================================
-# META ENDPOINTS
-# ==========================================
 @app.get("/health", tags=["Meta"])
 def health_check():
     return {"status": "healthy"}
@@ -64,11 +54,7 @@ def get_versions(request: Request):
         ]
     }
 
-
-# ==========================================
-# ROUTERS
-# ==========================================
-app.include_router(vehicles_v1.router)
-app.include_router(vehicles_v2.router)
-app.include_router(positions.router)
-app.include_router(fuel_logs.router)
+app.include_router(VehicleV1Controller.router)
+app.include_router(VehicleV2Controller.router)
+app.include_router(PositionController.router)
+app.include_router(FuelLogController.router)

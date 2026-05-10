@@ -33,7 +33,6 @@ class VehicleOutV2(BaseModel):
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
     id:           int
-    # The alias tells Pydantic to read 'plate' from the ORM and map it here!
     registration: str = Field(validation_alias='plate')
     model:        str
     driver:       str | None
