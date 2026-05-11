@@ -1,5 +1,5 @@
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, computed_field
 from app.enums.vehicle_enum import VehicleStatus
 
 
@@ -26,7 +26,17 @@ class VehicleOut(BaseModel):
     driver:     str | None
     status:     VehicleStatus
     created_at: datetime
-    _links:     dict | None = None
+
+    @computed_field
+    @property
+    def _links(self) -> dict:
+        base = f"/api/v1/vehicles/{self.id}"
+        return {
+            "self":       {"href": base},
+            "collection": {"href": "/api/v1/vehicles"},
+            "positions":  {"href": f"{base}/positions"},
+            "fuel":       {"href": f"{base}/fuel"},
+        }
 
 
 class VehicleOutV2(BaseModel):
@@ -38,4 +48,12 @@ class VehicleOutV2(BaseModel):
     driver:       str | None
     status:       VehicleStatus
     created_at:   datetime
-    _links:       dict | None = None
+
+    @computed_field
+    @property
+    def _links(self) -> dict:
+        base = f"/api/v2/vehicles/{self.id}"
+        return {
+            "self":       {"href": base},
+            "collection": {"href": "/api/v2/vehicles"},
+        }

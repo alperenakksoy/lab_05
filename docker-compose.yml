@@ -40,7 +40,7 @@ services:
     depends_on:
       api:
         condition: service_healthy
-    healthcheck:                                          # FIXED: healthcheck eksikti
+    healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/health"]
       interval: 10s
       timeout: 5s

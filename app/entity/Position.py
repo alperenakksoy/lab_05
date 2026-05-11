@@ -9,8 +9,6 @@ from app.database import Base
 if TYPE_CHECKING:
     from app.entity.Vehicle import Vehicle
 
-
-
 class Position(Base):
     __tablename__ = "positions"
 
