@@ -4,3 +4,4 @@ sqlalchemy
 uvicorn
 psycopg2-binary
 slowapi
+requests

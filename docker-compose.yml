@@ -20,8 +20,8 @@ services:
     build: .
     environment:
       - DATABASE_URL=postgresql://admin:password@db:5432/fleet_db
-      - API_KEY=fleet-secret-key
-      - BEARER_TOKEN=fleet-bearer-token
+      - API_KEY=api
+      - BEARER_TOKEN=bearer
     depends_on:
       db:
         condition: service_healthy

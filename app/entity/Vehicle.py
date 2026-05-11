@@ -24,7 +24,6 @@ class Vehicle(Base):
                     default=VehicleStatus.ACTIVE, nullable=False)
     created_at: Mapped[datetime]      = mapped_column(DateTime, default=datetime.utcnow)
 
-    # String references only — never import Position/FuelLog directly here
     positions: Mapped[list["Position"]] = relationship(
         "Position", back_populates="vehicle", cascade="all, delete-orphan"
     )
