@@ -9,7 +9,6 @@ router = APIRouter(
     tags=["Positions"],
 )
 
-
 @router.post("/{vehicle_id}/positions", response_model=PositionOut, status_code=status.HTTP_201_CREATED)
 @limiter.limit("100/minute")
 def log_position(
@@ -20,7 +19,6 @@ def log_position(
     api_key: ApiKey,
 ):
     return PositionService.log_position(db, vehicle_id, data)
-
 
 @router.get("/{vehicle_id}/positions/latest", response_model=PositionOut)
 @limiter.limit("100/minute")

@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 class Position(Base):
     __tablename__ = "positions"
 
-    id:          Mapped[int]      = mapped_column(primary_key=True, index=True)
+    id:          Mapped[int]      = mapped_column(primary_key=True)
     vehicle_id:  Mapped[int]      = mapped_column(ForeignKey("vehicles.id", ondelete="CASCADE"), nullable=False)
     latitude:    Mapped[float]    = mapped_column(Float, nullable=False)
     longitude:   Mapped[float]    = mapped_column(Float, nullable=False)

@@ -9,14 +9,10 @@ from slowapi.util import get_remote_address
 
 from app.database import get_db
 
-# ==========================================
-# RATE LIMITER
-# ==========================================
+# rate limiter
 limiter = Limiter(key_func=get_remote_address)
 
-# ==========================================
-# AUTH CREDENTIALS
-# ==========================================
+# credentials
 VALID_API_KEY = os.getenv("API_KEY", "dev-secret-key")
 VALID_TOKEN   = os.getenv("BEARER_TOKEN", "dev-bearer-token")
 
@@ -41,9 +37,6 @@ def verify_content_type(accept: str = Header(default="*/*")) -> None:
         raise HTTPException(status_code=406, detail="Accept header must allow application/json")
 
 
-# ==========================================
-# ANNOTATED DEPENDENCY ALIASES
-# ==========================================
 DbSession   = Annotated[Session, Depends(get_db)]
 RequireJson = Annotated[None, Depends(verify_content_type)]
 ApiKey      = Annotated[str, Depends(require_api_key)]

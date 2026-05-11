@@ -6,7 +6,7 @@ info:
   version: 1.0.0
 
 servers:
-  - url: http://localhost:8000
+  - url: http://localhost
     description: Local Development Server
 
 paths:
@@ -26,7 +26,7 @@ paths:
         "429":
           $ref: '#/components/responses/TooManyRequests'
 
-  # --- V1 VEHICLES ---
+  # V1 vehicles
   /api/v1/vehicles:
     get:
       summary: List vehicles (v1)
@@ -107,7 +107,7 @@ paths:
         "404":
           $ref: '#/components/responses/NotFound'
 
-  # --- V1 POSITIONS & FUEL ---
+  # V1 position
   /api/v1/vehicles/{id}/positions:
     post:
       summary: Log a vehicle position
@@ -131,6 +131,7 @@ paths:
         "404":
           $ref: '#/components/responses/NotFound'
 
+  # V1 fuel
   /api/v1/vehicles/{id}/fuel:
     post:
       summary: Log vehicle fuel level
@@ -154,7 +155,7 @@ paths:
         "404":
           $ref: '#/components/responses/NotFound'
 
-  # --- V2 VEHICLES ---
+  # V2 vehicle
   /api/v2/vehicles:
     get:
       summary: List vehicles (v2)

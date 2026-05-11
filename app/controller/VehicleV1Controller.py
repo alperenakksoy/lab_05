@@ -9,7 +9,6 @@ router = APIRouter(
     tags=["Vehicles V1"],
 )
 
-
 @router.get("", response_model=list[VehicleOut])
 @limiter.limit("100/minute")
 def list_vehicles(
@@ -22,7 +21,6 @@ def list_vehicles(
 ):
     return VehicleService.get_all(db, skip=skip, limit=limit)
 
-
 @router.post("", response_model=VehicleOut, status_code=status.HTTP_201_CREATED)
 @limiter.limit("100/minute")
 def create_vehicle(
@@ -33,7 +31,6 @@ def create_vehicle(
     api_key: ApiKey,
 ):
     return VehicleService.create(db, data)
-
 
 @router.get("/{vehicle_id}", response_model=VehicleOut)
 @limiter.limit("100/minute")
@@ -46,7 +43,6 @@ def get_vehicle(
 ):
     return VehicleService.get_by_id(db, vehicle_id)
 
-
 @router.put("/{vehicle_id}", response_model=VehicleOut)
 @limiter.limit("100/minute")
 def update_vehicle(
@@ -58,7 +54,6 @@ def update_vehicle(
     api_key: ApiKey,
 ):
     return VehicleService.update(db, vehicle_id, data)
-
 
 @router.delete("/{vehicle_id}", status_code=status.HTTP_204_NO_CONTENT)
 @limiter.limit("100/minute")

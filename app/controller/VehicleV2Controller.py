@@ -9,7 +9,6 @@ router = APIRouter(
     tags=["Vehicles V2"],
 )
 
-
 @router.get("", response_model=list[VehicleOutV2])
 @limiter.limit("100/minute")
 def list_vehicles(
@@ -22,7 +21,6 @@ def list_vehicles(
 ):
     return VehicleService.get_all_v2(db, skip=skip, limit=limit)
 
-
 @router.get("/{vehicle_id}", response_model=VehicleOutV2)
 @limiter.limit("100/minute")
 def get_vehicle(
@@ -33,7 +31,6 @@ def get_vehicle(
     token: BearerToken,
 ):
     return VehicleService.get_by_id_v2(db, vehicle_id)
-
 
 @router.post("", response_model=VehicleOutV2, status_code=status.HTTP_201_CREATED)
 @limiter.limit("100/minute")
@@ -46,7 +43,6 @@ def create_vehicle(
     v = VehicleService.create(db, data)
     return VehicleService.get_by_id_v2(db, v.id)
 
-
 @router.put("/{vehicle_id}", response_model=VehicleOutV2)
 @limiter.limit("100/minute")
 def update_vehicle(
@@ -58,7 +54,6 @@ def update_vehicle(
 ):
     VehicleService.update(db, vehicle_id, data)
     return VehicleService.get_by_id_v2(db, vehicle_id)
-
 
 @router.delete("/{vehicle_id}", status_code=status.HTTP_204_NO_CONTENT)
 @limiter.limit("100/minute")

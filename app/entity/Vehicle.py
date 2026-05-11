@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 class Vehicle(Base):
     __tablename__ = "vehicles"
 
-    id:         Mapped[int]           = mapped_column(primary_key=True, index=True)
+    id:         Mapped[int]           = mapped_column(primary_key=True)
     plate:      Mapped[str]           = mapped_column(String(20), unique=True, nullable=False)
     model:      Mapped[str]           = mapped_column(String(100), nullable=False)
     driver:     Mapped[str | None]    = mapped_column(String(100), nullable=True)

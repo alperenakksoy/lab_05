@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 class FuelLog(Base):
     __tablename__ = "fuel_logs"
 
-    id:          Mapped[int]        = mapped_column(primary_key=True, index=True)
+    id:          Mapped[int]        = mapped_column(primary_key=True)
     vehicle_id:  Mapped[int]        = mapped_column(ForeignKey("vehicles.id", ondelete="CASCADE"), nullable=False)
     fuel_level:  Mapped[float]      = mapped_column(Float, nullable=False)
     fuel_litres: Mapped[float|None] = mapped_column(Float, nullable=True)

@@ -9,7 +9,6 @@ router = APIRouter(
     tags=["Fuel Logs"],
 )
 
-
 @router.post("/{vehicle_id}/fuel", response_model=FuelLogOut, status_code=status.HTTP_201_CREATED)
 @limiter.limit("100/minute")
 def log_fuel(
@@ -20,7 +19,6 @@ def log_fuel(
     api_key: ApiKey,
 ):
     return FuelLogService.log_fuel(db, vehicle_id, data)
-
 
 @router.get("/{vehicle_id}/fuel", response_model=list[FuelLogOut])
 @limiter.limit("100/minute")

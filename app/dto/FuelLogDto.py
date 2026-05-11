@@ -6,7 +6,6 @@ class FuelLogCreate(BaseModel):
     fuel_level: float = Field(..., ge=0, le=100)
     fuel_litres: float | None = None
 
-
 class FuelLogOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int
